@@ -1,0 +1,43 @@
+# reiniciar equipos: 10.122.5.117 => WSSinpe_IBAN_App, PS.CGP.PIN.Incoming, PS.CGP.PIN.Outgoing, WSSinpe_IBAN_App, TiempoRealEntrante_IBAN_App    
+    
+    
+    
+    - name: Reciclar Pool WSSinpe_IBAN_App
+      win_iis_webapppool:
+        name: WSSinpe_IBAN_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PIN.Incoming
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Incoming
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PIN.Outgoing
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Outgoing
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool WSSinpe_IBAN_App
+      win_iis_webapppool:
+        name: WSSinpe_IBAN_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool TiempoRealEntrante_IBAN_App
+      win_iis_webapppool:
+        name: TiempoRealEntrante_IBAN_App
+        state: restarted
+ 
+    - pause:
+        minutes: 0.50

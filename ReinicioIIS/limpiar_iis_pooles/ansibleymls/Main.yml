@@ -1,0 +1,47 @@
+- name: Reinicio Pooles SINPE
+  hosts: "{{ grupoServidores }}"
+  gather_facts: no
+  collections:
+    - ansible.windows
+    - community.windows
+
+  tasks:
+  # - name: Mensaje
+  #   debug:
+  #     msg: "{{ grupoServidores }}"
+
+  - name: Reinicio de todos los pooles
+    include_tasks: iis_pool_restart_all.yml
+    when: grupoServidores[0] == "Sinpe_Bco"
+  
+  - name: Renicia pooles server CRICPPSINPERTAP1
+    include_tasks: Serv_SINPERTAP1.yml
+    when: grupoServidores[0] == "CRICPPSINPERTAP1" 
+
+  - name: Renicia pooles server cricppsinprtap2
+    include_tasks: Serv_SINPERTAP2.yml
+    when: grupoServidores[0] == 'cricppsinprtap2'
+
+  - name: Renicia pooles server CRICPPSINPMOVAP
+    include_tasks: Serv_SINPMOVAP.yml
+    when: grupoServidores[0] == "CRICPPSINPMOVAP"
+
+  - name: Renicia pooles server CRICPPSINPMVAP2
+    include_tasks: Serv_SINPERTAP1.yml
+    when: grupoServidores[0] == "CRICPPSINPMVAP2"
+
+  - name: Renicia pooles server CRICPPSINPEAP2
+    include_tasks: Serv_SINPERTAP1.yml
+    when: grupoServidores[0] == "CRICPPSINPEAP2"
+
+  - name: Renicia pooles server CRICPPSINPEAP1
+    include_tasks: Serv_SINPERTAP1.yml
+    when: grupoServidores[0] == "CRICPPSINPEAP1"
+
+  - name: Renicia pooles server CRICPPSINPEWS1
+    include_tasks: Serv_SINPERTAP1.yml
+    when: grupoServidores[0] == "CRICPPSINPEWS1"
+
+  - name: Renicia pooles server CRICPPSINPEWS2
+    include_tasks: serv_sinpertap1.yml
+    when: grupoServidores[0] == "CRICPPSINPEWS2"

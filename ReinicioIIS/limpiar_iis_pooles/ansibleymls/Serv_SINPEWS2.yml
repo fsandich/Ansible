@@ -1,0 +1,60 @@
+    - name: Reciclar Pool CGPComponentesWeb_App
+      win_iis_webapppool:
+        name: CGPComponentesWeb_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPServicesWeb_App
+      win_iis_webapppool:
+        name: CGPServicesWeb_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool IntegracionSI_App
+      win_iis_webapppool:
+        name: IntegracionSI_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool IntegracionSICOM_App
+      win_iis_webapppool:
+        name: IntegracionSICOM_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PrivateInferfaces
+      win_iis_webapppool:
+        name: PS.CGP.PrivateInferfaces
+        state: restarted
+ 
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PublicInferface
+      win_iis_webapppool:
+        name: PS.CGP.PublicInferface
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPCanalesCC_App
+      win_iis_webapppool:
+        name: CGPCanalesCC_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPCanalesIBAN_App
+      win_iis_webapppool:
+        name: CGPCanalesIBAN_App
+        state: restarted

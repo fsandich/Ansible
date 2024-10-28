@@ -1,0 +1,90 @@
+# - name: Reinicio Pooles SINPE
+#   hosts: "{{ grupoServidores }}"
+#   gather_facts: no
+#   collections:
+#     - ansible.windows
+#     - community.windows
+
+#   tasks:
+       
+    - name: Reciclar Pool CGPComponentesWeb_App
+      win_iis_webapppool:
+        name: CGPComponentesWeb_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPServicesWeb_App
+      win_iis_webapppool:
+        name: CGPServicesWeb_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool IntegracionSI_App
+      win_iis_webapppool:
+        name: IntegracionSI_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool IntegracionSICOM_App
+      win_iis_webapppool:
+        name: IntegracionSICOM_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PrivateInferfaces
+      win_iis_webapppool:
+        name: PS.CGP.PrivateInferfaces
+        state: restarted
+ 
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PS.CGP.PublicInferface
+      win_iis_webapppool:
+        name: PS.CGP.PublicInferface
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPCanalesCC_App
+      win_iis_webapppool:
+        name: CGPCanalesCC_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool CGPCanalesIBAN_App
+      win_iis_webapppool:
+        name: CGPCanalesIBAN_App
+        state: restarted
+        
+ # Pooles de Sinpe PIN/dtr      
+    - name: Reciclar Pool PS.CGP.PIN.Incoming
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Incoming
+        state: restarted
+
+    - name: Reciclar Pool PS.CGP.PIN.Outgoing
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Outgoing
+        state: restarted
+
+    - name: Reciclar Pool TiempoRealEntrante_IBAN_App
+      win_iis_webapppool:
+        name: TiempoRealEntrante_IBAN_App
+        state: restarted
+
+    - name: Reciclar Pool WSSinpe_IBAN_App
+      win_iis_webapppool:
+        name: WSSinpe_IBAN_App
+        state: restarted

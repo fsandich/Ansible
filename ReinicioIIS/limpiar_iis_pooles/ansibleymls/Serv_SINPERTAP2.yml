@@ -1,0 +1,15 @@
+ # Pooles de Sinpe PIN/dtr      
+    - name: Reciclar Pool PS.CGP.PIN.Incoming
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Incoming
+        state: restarted
+
+    - name: Reciclar Pool PS.CGP.PIN.Outgoing
+      win_iis_webapppool:
+        name: PS.CGP.PIN.Outgoing
+        state: restarted
+        
+    - name: Reciclar Pool WSSinpe_IBAN_App
+      win_iis_webapppool:
+        name: WSSinpe_IBAN_App
+        state: restarted

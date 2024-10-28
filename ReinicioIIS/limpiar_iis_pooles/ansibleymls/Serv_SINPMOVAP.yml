@@ -1,0 +1,15 @@
+    - name: Reciclar Pool PMB_Entrante_App
+      win_iis_webapppool:
+        name: PMB_Entrante_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PMB_Saliente_App
+      win_iis_webapppool:
+        name: PMB_Saliente_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50

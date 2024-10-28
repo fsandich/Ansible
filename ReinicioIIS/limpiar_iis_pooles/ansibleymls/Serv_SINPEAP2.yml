@@ -1,0 +1,15 @@
+    - name: Reciclar Pool PortalCGP_App
+      win_iis_webapppool:
+        name: PortalCGP_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
+
+    - name: Reciclar Pool PortalCGP_Entidad_App
+      win_iis_webapppool:
+        name: PortalCGP_Entidad_App
+        state: restarted
+
+    - pause:
+        minutes: 0.50
