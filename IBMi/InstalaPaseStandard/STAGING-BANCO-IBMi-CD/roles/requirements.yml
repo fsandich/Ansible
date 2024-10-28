@@ -1,0 +1,5 @@
+roles:
+  - src: git@ssh.dev.azure.com:v3/ORG-CRI-GTI/ANSIBLE-ROLES/IBMi_DEVOPS_ROLES
+    scm: git
+    version: main
+    name: IBMi_DEVOPS_ROLES

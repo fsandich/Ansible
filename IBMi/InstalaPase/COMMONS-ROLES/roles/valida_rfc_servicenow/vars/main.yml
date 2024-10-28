@@ -1,0 +1,8 @@
+---
+invar_rfc: ' '
+invar_username: ' '
+invar_password: ' '
+invar_host: 'https://bacdev.service-now.com'
+invar_valida_tareas: true
+invar_rollback: false
+invar_staging: false

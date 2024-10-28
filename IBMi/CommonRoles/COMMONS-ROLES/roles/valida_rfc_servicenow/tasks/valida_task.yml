@@ -1,0 +1,40 @@
+---
+
+- name: valida fecha inicio vacia
+  debug:
+    msg: 'ERROR - Fecha de inicio planeada para la tarea de impementacion en blanco para el RFC {{invar_rfc}}'
+  failed_when: rfc_tasksoutput['json']['result'][lp_idx]['planned_start_date'] == ''   
+  when: rfc_tasksoutput['json']['result'][lp_idx]['planned_start_date'] == ''
+
+- name: valida fecha final vacia
+  debug:
+    msg: 'ERROR - Fecha de finalización planeada para la tarea de impementacion en blanco para el RFC {{invar_rfc}}'
+  failed_when: rfc_tasksoutput['json']['result'][lp_idx]['planned_end_date'] == ''   
+  when: rfc_tasksoutput['json']['result'][lp_idx]['planned_end_date'] == ''
+
+- name: block determina tareas de implementacion validas
+  block:
+
+    - name: control de tareas valida para el RFC
+      set_fact:
+        rfc__task_valido: true
+
+    - name: trae datos del attach si existe 
+      uri:
+        url: "{{invar_host}}/api/now/attachment?sysparm_query=table_name=change_task^table_sys_id={{rfc_tasksoutput['json']['result'][lp_idx]['sys_id']}}"
+        url_username: "{{invar_username}}"
+        url_password: "{{invar_password}}"
+        force_basic_auth: yes
+        validate_certs: no
+        method: GET
+      register: rfc_tasks_attach_output
+
+    - name: Valida los attachment a la tarea (itera por attach)
+      include_tasks: valida_attach.yml
+      loop: "{{rfc_tasks_attach_output['json']['result']}}"
+      loop_control:
+        loop_var: job_log_var1
+        index_var: lp_idx1
+      when: rfc_tasks_attach_output['json']['result'] != [] 
+
+  when: (rfc_tasksoutput['json']['result'][lp_idx]['planned_start_date'] | to_datetime) <= (datetime_hoy | to_datetime) and (rfc_tasksoutput['json']['result'][lp_idx]['planned_end_date'] | to_datetime) >= (datetime_hoy | to_datetime)

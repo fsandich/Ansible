@@ -1,0 +1,18 @@
+---
+
+- name: hay adjunto valido para la tarea
+  block:
+
+    - name: hay adjuntos validos para el RFC
+      set_fact:
+        rfc__task_attach_valido: true
+
+    - name: mapa de valores validos para rfc, tarea y attach
+      set_fact:
+        mapa_attach_url: [attach_name: "{{rfc_tasks_attach_output['json']['result'][lp_idx1]['file_name']}}", attach_url: "{{rfc_tasks_attach_output['json']['result'][lp_idx1]['download_link']}}", number_rfc: "{{rfcoutput['records'][0]['number']}}", number_task: "{{rfc_tasksoutput['json']['result'][lp_idx]['number']}}", task_sys_id: "{{rfc_tasksoutput['json']['result'][lp_idx]['sys_id']}}"]
+
+    - name: genera lista de mapar de valores validos
+      set_fact:
+        tareas_attach_url: "{{ tareas_attach_url + [ mapa_attach_url ] }}" 
+         
+  when: rfc_tasks_attach_output['json']['result'][lp_idx1]['file_name'] | regex_search('.cl', ignorecase=True)  == ".cl" or rfc_tasks_attach_output['json']['result'][lp_idx1]['file_name'] | regex_search('.sql', ignorecase=True) == ".sql"

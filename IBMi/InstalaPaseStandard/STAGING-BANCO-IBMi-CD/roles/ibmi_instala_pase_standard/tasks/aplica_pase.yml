@@ -1,0 +1,18 @@
+---
+- name: Copia script de llamado a revision de pase
+  ansible.builtin.copy:
+    src: script_aplicapase.cl
+    dest: '.'
+    mode: '0755'
+
+- name: Modifica script de llamado a instalacion
+  ansible.builtin.lineinfile:
+    path: script_aplicapase.cl
+    insertafter: EOF
+    line: "CALL PGM(P$CMLIBPRO/P$P417) PARM('{{row['row'][0]['$405SP']}}' X'{{ '000'[:3- (row['row'][0]['$405CP']|regex_replace('.0')|length|int) ] }}{{row['row'][0]['$405CP'] | regex_replace('.0') }}F' '{{row['row'][0]['$405CD']}}' '{{row['row'][0]['$405ID']}}' '{{row['row'][0]['$405MO']}}' '0' ' ' ' '):"
+
+- name: Ejecuta script llamado instalacion de pases
+  ibm.power_ibmi.ibmi_script_execute:
+    src: 'script_aplicapase.cl'
+    type: 'CL'
+  register: resultados_aplicar_pase

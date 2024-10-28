@@ -1,0 +1,62 @@
+---
+
+- name: bloque para validar rfc produccion 
+  block:
+
+    - name: Lee rfc para obtener informacion  y validar 
+      servicenow.itsm.change_request_info:
+        instance:
+          host: '{{invar_host}}'
+          username: '{{invar_username}}'
+          password: '{{invar_password}}'
+        number: '{{invar_rfc}}'
+      delegate_to: 127.0.0.1
+      register: rfcoutput
+
+    - name: despliega error de RFC no encontrado
+      debug:
+        msg: 'ERROR - No se encontro el RFC {{invar_rfc}} O se encuentra en estado invalido para procesar en produccion'
+      failed_when: rfcoutput['records'] == [] or rfcoutput['records'][0]['state'] != "implement" or rfcoutput['records'][0]['active'] != "true"
+      when: rfcoutput['records'] == [] or rfcoutput['records'][0]['state'] != "implement" or rfcoutput['records'][0]['active'] != "true"  
+
+    - name: carga variable de elemento de configuracion
+      set_fact:
+        rfc_elementocfg: "{{rfcoutput['records'][0]['cmdb_ci']}}"
+      when: invar_valida_tareas == true and rfcoutput['records'][0]['state'] == "implement" and rfcoutput['records'][0]['active'] == "true"
+
+    - name: Valida tareas del RFC 
+      include_tasks: valida_tasks_rfc_servicenow.yml
+      when: invar_valida_tareas == true and rfcoutput['records'][0]['state'] == "implement" and rfcoutput['records'][0]['active'] == "true"
+
+  when: invar_staging == false
+
+
+- name: bloque para validar rfc staging 
+  block:
+
+    - name: Lee rfc para obtener informacion y validar 
+      servicenow.itsm.change_request_info:
+        instance:
+          host: '{{invar_host}}'
+          username: '{{invar_username}}'
+          password: '{{invar_password}}'
+        number: '{{invar_rfc}}'
+      delegate_to: 127.0.0.1
+      register: rfcoutput
+
+    - name: despliega error de RFC no encontrado
+      debug:
+        msg: 'ERROR - No se encontro el RFC {{invar_rfc}} O se encuentra en estado invalido para procesar en staging'
+      failed_when: rfcoutput['records'] == [] or rfcoutput['records'][0]['state'] != "assess" or rfcoutput['records'][0]['active'] != "true"
+      when: rfcoutput['records'] == [] or rfcoutput['records'][0]['state'] != "assess" or rfcoutput['records'][0]['active'] != "true"  
+
+    - name: carga variable de elemento de configuracion
+      set_fact:
+        rfc_elementocfg: " "
+      when: invar_valida_tareas == true and rfcoutput['records'][0]['state'] == "assess" and rfcoutput['records'][0]['active'] == "true"
+
+    - name: Valida tareas del RFC 
+      include_tasks: valida_tasks_rfc_servicenow.yml
+      when: invar_valida_tareas == true and rfcoutput['records'][0]['state'] == "assess" and rfcoutput['records'][0]['active'] == "true"
+
+  when: invar_staging == true

@@ -1,0 +1,19 @@
+---
+- name: Crear variable de listado de pase
+  ansible.builtin.set_fact:
+    lista_pases: "{{ invar_pases_lista.split('\n') }}"
+
+- name: Busca pase para validar datos
+  ibm.power_ibmi.ibmi_sql_query:
+    sql: "select * from P$CMDATPRO.P$A40510 where $405SP = '{{ item.1.split(',')[0] }}' and $405CD = '{{ item.0 }}' and $405CP = '{{ item.1.split(',')[1] }}'"
+  with_nested:
+    - "{{ invar_cpu }}"
+    - "{{ lista_pases }}"
+  register: row_result
+
+- name: Backup pase y llama instalacion (itera por consecutivo)
+  ansible.builtin.include_tasks: backup_pase.yml
+  loop: "{{ row_result.results }}"
+  loop_control:
+    loop_var: row
+  when: row.row_count != 0

@@ -1,0 +1,5 @@
+roles:
+  - src: git@ssh.dev.azure.com:v3/ORG-CRI-GTI/IBMi-AUTOM-ANSIBLE/COMMONS-ROLES
+    scm: git
+    version: Feature/DPAT-412
+    name: COMMONS-ROLES

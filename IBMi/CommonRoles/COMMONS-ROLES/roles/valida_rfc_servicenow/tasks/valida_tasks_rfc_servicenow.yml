@@ -1,0 +1,131 @@
+---
+
+- name: para fecha validacion 
+  set_fact:
+    datetime_hoy: "{{ansible_date_time.date}} {{ansible_date_time.time}}"
+
+- name: bloque valida tareas aplicar normal 
+  block:
+
+    - name: url 
+      set_fact:
+        change_task_url: "{{invar_host}}/api/now/v1/table/change_task?sysparm_query=parent={{rfcoutput['records'][0]['sys_id']}}^active=true^short_description=Implementar^state=1^change_task_type=implementation^ORDERBYnumber"
+
+    - name: trae las tareas del rfc 
+      uri:
+        url: "{{change_task_url}}"
+        url_username: "{{invar_username}}"
+        url_password: "{{invar_password}}"
+        force_basic_auth: yes
+        validate_certs: no
+        status_code: [200, 404]
+        method: GET
+      register: rfc_tasksoutput
+
+    - name: error no hay tareas validas rfc
+      debug:
+        msg: 'ERROR - No hay tareas de impementacion validas para el RFC {{invar_rfc}}'
+      failed_when: rfc_tasksoutput['json']['error']['message'] == "No Record found"   
+      when: rfc_tasksoutput['status'] == 404
+
+    - name: bloque ejecucion si hay tareas RFC 
+      block:
+
+          - name: control de validacion tareas para el RFC
+            set_fact:
+              rfc__task_valido: false
+
+          - name: control de validacion de adjuntos
+            set_fact:
+              rfc__task_attach_valido: false
+
+          - name: carga url attach mapa de tareas validas
+            set_fact:
+              tareas_attach_url: [] 
+    
+          - name: Valida las tareas del RFC (itera por tarea)
+            include_tasks: valida_task.yml
+            loop: "{{rfc_tasksoutput['json']['result']}}"
+            loop_control:
+              loop_var: job_log_var
+              index_var: lp_idx
+
+          - name: error no hay tareas dentro de fechas validas rfc
+            debug:
+              msg: 'ERROR - No hay tareas de impementacion en fechas validas para el RFC {{invar_rfc}}'
+            failed_when: rfc__task_valido == false   
+            when: rfc__task_valido == false
+
+          - name: error no hay adjuntos validos en tareas del rfc
+            debug:
+              msg: 'ERROR - No hay adjuntos validos para las tareas del RFC {{invar_rfc}}'
+            failed_when: rfc__task_attach_valido == false   
+            when: rfc__task_attach_valido == false
+
+      when: rfc_tasksoutput['json']['result'] != []
+
+  when: invar_rollback == false
+
+
+- name: bloque valida tareas aplicar rollback 
+  block:
+
+    - name: url 
+      set_fact:
+        change_task_url: "{{invar_host}}/api/now/v1/table/change_task?sysparm_query=parent={{rfcoutput['records'][0]['sys_id']}}^active=true^short_description=rollback^state=1^change_task_type=implementation^ORDERBYnumber"
+
+    - name: trae las tareas rollback del rfc 
+      uri:
+        url: "{{change_task_url}}"
+        url_username: "{{invar_username}}"
+        url_password: "{{invar_password}}"
+        force_basic_auth: yes
+        validate_certs: no
+        return_content: yes
+        status_code: [200, 404]  
+        method: GET
+      register: rfc_tasksoutput
+
+    - name: error no hay tareas rollback validas rfc
+      debug:
+        msg: 'ERROR - No hay tareas de RollBack validas para el RFC {{invar_rfc}}'
+      failed_when: rfc_tasksoutput['json']['error']['message'] == "No Record found"   
+      when: rfc_tasksoutput['status'] == 404
+
+    - name: bloque ejecucion si hay tareas rollback RFC 
+      block:
+
+          - name: control de tareas valida para el RFC
+            set_fact:
+              rfc__task_valido: false
+
+          - name: control de validacion de adjuntos
+            set_fact:
+              rfc__task_attach_valido: false
+
+          - name: carga url attach mapa de tareas validas
+            set_fact:
+              tareas_attach_url: [] 
+    
+          - name: Valida las tareas del RFC (itera por tarea)
+            include_tasks: valida_task.yml
+            loop: "{{rfc_tasksoutput['json']['result']}}"
+            loop_control:
+              loop_var: job_log_var
+              index_var: lp_idx
+
+          - name: error no hay tareas rollback dentro de fechas validas rfc
+            debug:
+              msg: 'ERROR - No hay tareas de rollback en fechas validas para el RFC {{invar_rfc}}'
+            failed_when: rfc__task_valido == false   
+            when: rfc__task_valido == false
+
+          - name: error no hay adjuntos validos en tareas del rfc
+            debug:
+              msg: 'ERROR - No hay adjuntos validos para las tareas de Rollback del RFC {{invar_rfc}}'
+            failed_when: rfc__task_attach_valido == false   
+            when: rfc__task_attach_valido == false
+
+      when: rfc_tasksoutput['json']['result'] != []
+
+  when: invar_rollback == true

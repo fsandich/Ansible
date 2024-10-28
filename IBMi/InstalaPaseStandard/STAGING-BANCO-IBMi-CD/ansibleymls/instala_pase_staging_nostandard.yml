@@ -1,0 +1,50 @@
+---
+- name: instala pase ibmi stagin
+  hosts: IBMi_Desarrollo
+  gather_facts: false
+  collections:
+      - ibm.power_ibmi
+  
+  vars:
+    id_pase: '{{ input_id_pase }}'
+
+  tasks:
+    - name: Return ibmi_facts
+      ibmi_facts:
+
+    - debug:
+            msg: "{{system_name}}" 
+
+    - name: Dbg home
+      debug:
+        msg: "'{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}' is the ROLES environment variable."
+
+    - name: cambia dir requirements_roles
+      command: chdir=../../requirements_roles/IBMi_DEVOPS_ROLES/IBMi_DEVOPS_ROLES/roles ls -al
+      delegate_to: 127.0.0.1
+      register: myoutput
+  
+    - debug:
+            msg: "{{myoutput}}"
+
+    - name: llama a programa rpg
+      include_role:
+        name: ../../requirements_roles/IBMi_DEVOPS_ROLES/IBMi_DEVOPS_ROLES/roles/ibmi_instala_pase
+      vars:
+        table: 'NMA005' 
+        lib: 'NMCMDATPRO'
+        cmpinstall_all_pending: no
+        cmpinstall_list: 
+          - 'FX-0000211'
+          - 'PN-0002644'
+
+    - debug:
+            msg: "{{row}}"
+
+
+    - name: Obtiene hosts del inventario
+      debug: 
+          msg: "{{ outjson['json']['results'] | json_query(jmesquery) }}"
+      register: datos_tabla
+      vars:
+          jmesquery: "[*].{Name: name, Description: description, Inventory: inventory, Enabled: enabled}"

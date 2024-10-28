@@ -1,0 +1,21 @@
+---
+- name: Instala pases standard
+  hosts: all 
+  gather_facts: false
+  collections:
+      - ibm.power_ibmi
+
+  vars:
+    pases_lista: []
+
+  tasks:
+    
+    - name: Ejecutar Rol PasesStandard IBMi
+      include_role:
+        name: ../../requirements_roles/COMMONS-ROLES/COMMONS-ROLES/roles/ibmi_instala_pase_standard
+      vars:
+        invar_pases_lista: '{{ pases_lista }}'
+
+    
+
+    

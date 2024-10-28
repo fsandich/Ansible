@@ -1,0 +1,81 @@
+---
+  # - name: despliega resultado de truncar
+  #   debug:
+  #     msg: "X'{{ '000'[:3- (row['row'][0]['$405CP']|regex_replace('.0')|length|int) ] }}{{row['row'][0]['$405CP'] | regex_replace('.0') }}F'"
+
+  - name: block de pase de instalacion distribuido y no instalado
+    block:
+
+    - name: block de instalciones con semaforo verde o amarillo(no rojo)
+      block:
+
+      - name: valida que biblioteca de modulo exista
+        ibm.power_ibmi.ibmi_object_find:
+          lib_name: 'QSYS'
+          iasp_name: '*SYSBAS'
+          object_name: "{{row['row'][0]['$405MO']}}"
+          object_type_list: "*LIB"
+        register: biblioteca_modulo
+ 
+      - name: block de biblioteca de pase no enviada
+        block:
+
+        - name: busca pase para validar datos 
+          ibm.power_ibmi.ibmi_sql_query:
+            sql: "SELECT * FROM P$CMDATPRO.DSTMOD T01 LEFT OUTER JOIN P$CMDATPRO.DSTDET T02 ON T01.DSTBIB = T02.DSTMO1 LEFT OUTER JOIN P$CMDATPRO.P$A406 T03 ON T01.DSTBIB = T03.$406MO WHERE T01.DSTFIM = '  ' AND T03.$406SP = '{{row['row'][0]['$405SP']}}'"
+          register: objetos_intalacion  
+
+        - name: Aplica pase
+          include_tasks: aplica_pase.yml
+          register: resultados_aplicar_pase
+          
+        - name: despliega resultado de aplicar pase
+          debug:
+            var: resultados_aplicar_pase
+          when: biblioteca_modulo.object_list != [] 
+
+      - name: pone valor de biblioteca de modulo no encontrada
+        set_fact:
+          err_biblioteca_modulo: "Pase numero {{ row.item[0] }} biblioteca {{row['row'][0]['$405MO']}} de modulo no distribuido, pase aun no en instalación:"
+        when: biblioteca_modulo.object_list == []
+
+      - name: despliega error de biblioteca de modulo no encontrada
+        debug:
+          var: err_biblioteca_modulo 
+        when: biblioteca_modulo.object_list == []
+    
+      when: false
+
+    #  when: row['row'][0]['$405CO'] | trim != "ROJO"
+
+    - name: pone valor de pase en color de semaforo
+      set_fact:
+        err_pase_noverde: "Pase numero {{ row.item[0] }} esta en semaforo {{row['row'][0]['$405CO']}}, pase aun no en instalación:"
+      when: row['row'][0]['$405CO'] | trim == "ROJO"
+
+    - name: despliega error de pase en color de semaforo
+      debug:
+        var: err_pase_noverde 
+      when: row['row'][0]['$405CO'] | trim == "ROJO"
+
+    when: row['row'][0]['$405FI'] == "        " and row['row'][0]['$405FR'] != "        " 
+    
+  - name: pone valor de pase ya instalado
+    set_fact:
+      err_pase_yainstalado: "Pase numero {{ row.item[0] }} ya fue instalado el {{row['row'][0]['$405FI']}}:"
+    when: row['row'][0]['$405FI'] != "        "
+
+  - name: despliega error de pase ya instalado
+    debug:
+      var: err_pase_yainstalado
+    when: row['row'][0]['$405FI'] != "        "
+
+  - name: pone valor de pase no recibido
+    set_fact:
+      err_pase_norecibido: "Pase numero {{ row.item[0] }} no ha sido recibido: "
+    when: row['row'][0]['$405FR'] == "        "
+
+  - name: despliega error de pase no recibido
+    debug:
+      var: err_pase_norecibido
+    when: row['row'][0]['$405FR'] == "        "

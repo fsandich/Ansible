@@ -1,0 +1,28 @@
+---
+- name: Copia script de llamado a backup de pase
+  ansible.builtin.copy:
+    src: script_bkpase.cl
+    dest: '.'
+    mode: '0755'
+
+- name: Modifica script de llamado a backup de pase
+  ansible.builtin.lineinfile:
+    path: script_bkpase.cl
+    insertafter: EOF
+    line: "CALL PGM(P$CMLIBPRO/P$P483) PARM('BKP' '{{row['row'][0]['$405SP']}}' X'{{ '000'[:3- (row['row'][0]['$405CP']|regex_replace('.0')|length|int) ] }}{{row['row'][0]['$405CP'] | regex_replace('.0') }}F' '{{row['row'][0]['$405CD']}}' '{{row['row'][0]['$405ID']}}'):"
+
+- name: Ejecuta script llamado a backup de pase
+  ibm.power_ibmi.ibmi_script_execute:
+    src: 'script_bkpase.cl'
+    type: 'CL'
+  register: resultados_backup
+
+- name: Busca pase para validar datos
+  ibm.power_ibmi.ibmi_sql_query:
+    sql: SELECT COUNT(*) FROM (SELECT 1 FROM "P$CMDATPRO"."P$A406" P406 WHERE "$406SP" = '{{row['row'][0]['$405SP']}}' AND "$406CP" = '{{row['row'][0]['$405CP']}}' AND "$406CD" = '{{row['row'][0]['$405CD']}}' AND "$406ID" = '{{row['row'][0]['$405ID']}}' AND NOT EXISTS (SELECT 1 FROM TABLE (QSYS2.OBJECT_STATISTICS('P$CMBKPRO', '*FILE', REPLACE(P406."$406MO", 'V', 'B'))) X)LIMIT 1)
+  register: objetos_intalacion
+
+- name: Aplica pase
+  ansible.builtin.include_tasks: aplica_pase.yml
+  register: resultados_aplicar_pase
+  when: objetos_intalacion.row[0]['00001'] | int == 0

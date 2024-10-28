@@ -1,0 +1,38 @@
+---
+- name: instala pase programa pde
+  hosts: all  #IBMi_banco_staging
+  gather_facts: false
+  collections:
+      - ibm.power_ibmi
+  
+  vars:
+    lista_pases: []
+
+  tasks:
+    - name: obtiene ibmi_facts
+      ibm.power_ibmi.ibmi_facts:
+
+    - name: muestra nombre de sistema
+      ansible.builtin.debug:
+        msg: "{{system_name}}" 
+
+    # - name: Dbg home
+    #   debug:
+    #     msg: "'{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}' is the ROLES environment variable."
+
+    # - name: cambia dir requirements_roles
+    #   command: chdir=../../requirements_roles/IBMi_DEVOPS_ROLES/IBMi_DEVOPS_ROLES/roles ls -al
+    #   delegate_to: 127.0.0.1
+    #   register: myoutput
+  
+    # - debug:
+    #         msg: "{{myoutput}}"
+
+    - name: llama a instalacion pase standard
+      include_role:
+        name: ../roles/ibmi_instala_pase_standard
+#      vars:
+#        invar_cpu: 'CRIOSI06'
+#        invar_pases_lista: '{{item}}'
+#      loop: "{{lista_pases}}"
+#        - 'PN-0002332'     
