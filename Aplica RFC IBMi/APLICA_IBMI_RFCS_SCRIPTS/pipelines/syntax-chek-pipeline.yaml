@@ -1,0 +1,26 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+trigger: none
+variables:
+  json_plan: ''
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-latest' 
+  steps:
+  - task: CmdLine@2
+    inputs:
+      script: 'cd $(System.DefaultWorkingDirectory)/ansibleymls'
+
+  - task: CmdLine@2
+    inputs:
+      script: |
+        for file in *
+                do
+                  if [ "${file}" == "*.yml" ]
+                  then
+                    ansible-playbook ${file} --syntax-check
+                  fi
+                done

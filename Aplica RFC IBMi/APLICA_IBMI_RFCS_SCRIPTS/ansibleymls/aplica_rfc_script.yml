@@ -1,0 +1,32 @@
+---
+- name: aplica script de rfc
+  hosts: IBMi
+  gather_facts: false
+  collections:
+      - ibm.power_ibmi
+  
+  tasks:
+
+    - name: Return ibmi_facts
+      ibmi_facts:
+
+    - debug:
+            msg: "{{system_name}}"
+
+    # - name: bloque aplica si condiciones se dan cpu y disco 
+    #   block:
+
+    - name: recorre la lista de attach obtenida (itera por attach)
+      include_tasks: ./descarga_aplica_script.yml
+      loop: "{{varsflujo_tareas_attach_url}}"
+      loop_control:
+        loop_var: job_log_var
+        index_var: lp_idx
+
+    #   when: system_status['AVERAGE_CPU_UTILIZATION'] <= {{porcentaje_max_cpu}} and system_status['SYSTEM_ASP_USED'] <= {{porcentaje_max_disco}} 
+
+    # - name:  cpu y disco
+    #   debug:
+    #       msg: "Porcentaje de %CPU {{system_status['AVERAGE_CPU_UTILIZATION']}} %DISCO {{system_status['SYSTEM_ASP_USED']}}"
+    #   when: system_status['AVERAGE_CPU_UTILIZATION'] >= {{porcentaje_max_cpu}} or system_status['SYSTEM_ASP_USED'] >= {{porcentaje_max_disco}}
+    #   failed_when: system_status['AVERAGE_CPU_UTILIZATION'] >= {{porcentaje_max_cpu}} or system_status['SYSTEM_ASP_USED'] >= {{porcentaje_max_disco}}

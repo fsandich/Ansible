@@ -1,0 +1,7 @@
+collections:
+  - name: ibm.power_ibmi
+    source: https://galaxy.ansible.com
+  - name: servicenow.itsm
+    source: https://galaxy.ansible.com
+  - name: awx.awx
+    source: https://galaxy.ansible.com    

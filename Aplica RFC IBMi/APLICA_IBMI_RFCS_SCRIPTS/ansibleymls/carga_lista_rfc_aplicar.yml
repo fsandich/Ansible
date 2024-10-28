@@ -1,0 +1,39 @@
+---
+- name: lista rfcs aplicar
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+    - name: trae el id de pais seleccionado 
+      uri:
+        url: "https://bacdev.service-now.com/api/now/v1/table/sys_user_group?sysparm_query=name={{invar_pais}}"
+        url_username: 'webAzurePipe'
+        url_password: 'webAzurePipe2021'
+        force_basic_auth: yes
+        validate_certs: no
+        method: GET
+      register: servicenow_idgroup 
+
+
+    - name: trae los rfc validos por pais 
+      uri:
+        url: "https://bacdev.service-now.com/api/now/v1/table/change_request?sysparm_query=active=true^state=-1^u_change_assignment_group[name]={{servicenow_idgroup['json']['result'][0]['sys_id']}}&sysparm_fields=number,short_description"
+        url_username: 'webAzurePipe'
+        url_password: 'webAzurePipe2021'
+        force_basic_auth: yes
+        validate_certs: no
+        method: GET
+      register: lista_rfcoutput 
+
+    # - name: dspliega dato de id pais
+    #   debug:
+    #     msg: "{{lista_rfcoutput}}"
+
+    - name: "Artifact - carga lista de RFCs x pais"
+      set_stats:
+        data:
+          varsflujo_lista_rfcoutput:  "{{lista_rfcoutput}}"
+          varsflujo_invar_username: "webAzurePipe"
+          varsflujo_invar_password: "webAzurePipe2021"
+          varsflujo_invar_host: "https://bacdev.service-now.com"

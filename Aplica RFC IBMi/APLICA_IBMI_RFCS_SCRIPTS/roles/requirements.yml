@@ -1,0 +1,10 @@
+roles:
+  - src: git@ssh.dev.azure.com:v3/ORG-CRI-GTI/AUTOM-ANSIBLE-IBMi/COMMONS-ROLES
+    scm: git
+    version: master
+    name: COMMONS-ROLES
+
+  - src: git@ssh.dev.azure.com:v3/ORG-CRI-GTI/VALHALLA_DEVOPS/VALHALLA_COMONS_ROLES
+    scm: git
+    version: master
+    name: VALHALLA_COMONS_ROLES

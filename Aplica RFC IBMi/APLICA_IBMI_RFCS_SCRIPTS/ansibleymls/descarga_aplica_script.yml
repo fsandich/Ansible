@@ -1,0 +1,68 @@
+---
+
+- name: descarga el script a aplicar en el IBMi
+  get_url:
+    url: "{{varsflujo_tareas_attach_url[lp_idx][1]['attach_url']}}"
+    dest: .
+    username: "{{varsflujo_invar_username}}"
+    password: "{{varsflujo_invar_password}}"
+  delegate_to: 127.0.0.1  
+
+- name: copia script de rfc
+  copy:
+    src: "{{varsflujo_tareas_attach_url[lp_idx][0]['attach_name']}}"
+    dest: '.'  
+
+- name: Ejecucion de CL 
+  block:
+
+  - name: ejecuta script RFCs CL
+    ibm.power_ibmi.ibmi_script_execute:
+      src: "{{varsflujo_tareas_attach_url[lp_idx][0]['attach_name']}}"
+      type: 'CL'
+    register: resultados_aplicar_script
+
+  - name: resultados del script 
+    debug:
+      var: resultados_aplicar_script
+
+  - name: Elimina el script
+    ansible.builtin.command: rm "{{varsflujo_tareas_attach_url[lp_idx][0]['attach_name']}}"
+
+  when: varsflujo_tareas_attach_url[lp_idx][0]['attach_name'] | regex_search('.cl', ignorecase=True)  == ".cl"
+
+- name: Ejecucion de SQL 
+  block:
+
+  - name: ejecuta script RFCs SQL
+    ibm.power_ibmi.ibmi_script_execute:
+      src: "{{varsflujo_tareas_attach_url[lp_idx][0]['attach_name']}}"
+      type: 'SQL'
+      parameters: 'COMMIT(*NONE)'
+    register: resultados_aplicar_script
+
+  - name: resultados del script 
+    debug:
+      var: resultados_aplicar_script
+
+  - name: Elimina el script
+    ansible.builtin.command: rm "{{varsflujo_tareas_attach_url[lp_idx][0]['attach_name']}}"
+
+  when: varsflujo_tareas_attach_url[lp_idx][0]['attach_name'] | regex_search('.sql', ignorecase=True) == ".sql"
+  
+# - name: cambia la tarea a cerrada 
+#   uri:
+#     url: "{{varsflujo_invar_host}}/api/now/v1/table/change_task/{{varsflujo_tareas_attach_url[lp_idx][4]['task_sys_id']}}"
+#     url_username: "{{varsflujo_invar_username}}"
+#     url_password: "{{varsflujo_invar_password}}"
+#     force_basic_auth: yes
+#     validate_certs: no
+#     method: PATCH
+#     body:
+#           "{'state':'3'}"
+#     headers:
+#           Content-Type: application/json
+#           Accept: application/json
+#   delegate_to: 127.0.0.1         
+#   register: task_change
+#   when: staging | bool == false

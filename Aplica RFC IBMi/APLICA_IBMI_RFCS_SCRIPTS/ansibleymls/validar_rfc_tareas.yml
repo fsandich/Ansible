@@ -1,0 +1,37 @@
+---
+- name: valida rfc
+  hosts: localhost
+  collections:
+      - servicenow.itsm
+  
+  tasks:
+  
+    - name: trae la llave del rol para ansible vault
+      include_role:
+        name: ../../requirements_roles/VALHALLA_COMONS_ROLES/VALHALLA_COMONS_ROLES/roles/key_ansible_vault
+      vars:
+        invar_servicio: 'servicenow'
+        invar_file: 'envfile.json' 
+        invar_dir: '/shareDpat/'   
+
+    - name: llama a validacion rfc servicenow
+      include_role:
+        name: ../../requirements_roles/COMMONS-ROLES/COMMONS-ROLES/roles/valida_rfc_servicenow
+      vars:
+        invar_rfc: '{{numrfc}}'
+        invar_username: "{{usuario_servicenow}}"
+        invar_password: "{{servicenowpass}}" 
+        invar_host: "{{servicenow_host}}"  
+        invar_valida_tareas: true 
+        invar_rollback: "{{rollback | bool}}"
+        invar_staging: "{{staging | bool}}"        
+
+    - name: "Artifact - carga el URL del script para flujo trabajo"
+      set_stats:
+        data:
+          varsflujo_tareas_attach_url:  "{{tareas_attach_url}}"
+          varsflujo_invar_username: "{{usuario_servicenow}}"
+          varsflujo_invar_password: "{{servicenowpass}}"
+          varsflujo_invar_host: "{{servicenow_host}}"
+          varsflujo_elementoconfig: "{{rfc_elementocfg}}"
+      when: rfc__task_valido == true and rfc__task_attach_valido == true

@@ -1,0 +1,71 @@
+---
+- name: carga inventario de elementos configuracion rfcs aplicar
+  hosts: localhost
+  gather_facts: false
+  collections:
+      - awx.awx
+  tasks:
+
+  - name: bloque incluye inventario elemento configuracion 
+    block:
+
+      - name: trae datos del elemento de configuracion 
+        uri:
+          url: "{{varsflujo_invar_host}}/api/now/v1/table/cmdb_ci/{{varsflujo_elementoconfig}}"
+          url_username: '{{varsflujo_invar_username}}'
+          url_password: '{{varsflujo_invar_password}}'
+          force_basic_auth: yes
+          validate_certs: no
+          method: GET
+        register: elemento_config 
+
+      - name: agrega host
+        host:
+          name: "{{elemento_config['json']['result']['name']}}"
+          description: "Elemento configuracion RFC"
+          inventory: "INV_IBMI_RFCS"
+          enabled: true
+          state: present
+          validate_certs: no
+          variables:
+            ansible_host: "{{elemento_config['json']['result']['ip_address']}}"
+            ansible_python_interpreter: "/QOpensys/pkgs/bin/python3"
+            ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+            group_names: ['IBMi']
+
+      - name: agrega host al groupo
+        group:
+          name: IBMi
+          description: "Servidores IBMi"
+          inventory: INV_IBMI_RFCS
+          hosts:
+            - "{{elemento_config['json']['result']['name']}}"
+
+    when: staging | bool == false
+
+  - name: bloque incluye inventario elemento configuracion Staging 
+    block:
+
+      - name: agrega host
+        host:
+          name: "{{host_staging}}"
+          description: "Elemento configuracion Staging RFC"
+          inventory: "INV_IBMI_RFCS"
+          enabled: true
+          state: present
+          validate_certs: no
+          variables:
+            ansible_host: "{{host_staging}}"
+            ansible_python_interpreter: "/QOpensys/pkgs/bin/python3"
+            ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+            group_names: ['IBMi']
+
+      - name: agrega host al groupo
+        group:
+          name: IBMi
+          description: "Servidores IBMi"
+          inventory: INV_IBMI_RFCS
+          hosts:
+            - "{{host_staging}}"      
+            
+    when: staging | bool == true
